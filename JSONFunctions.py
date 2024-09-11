@@ -93,7 +93,7 @@ def DelMod(modName, jsonData):
 
     jsonData["ModInfo"].remove(modData)
 
-    newJsonData = FormatJSON(jsonData)
+    newJsonData = jsonData
 
     return newJsonData
 
