@@ -55,10 +55,12 @@ def GetModData(modName, jsonData):
     return None
 
 
-def UpdateModSize(modName, jsonData, newSize):
-    '''Updates the size for the given mod name and returns the complete updated json string'''
+def SetVariableValue(modName, jsonData, variableName, value):
+    '''Updates the value for the given mod name and given variable and returns the complete updated json string. 
+    Variable is created if it doesn't already exist'''
     modData = GetModData(modName, jsonData)
-    modData["ModSize"] = int(newSize)
+
+    modData[variableName] = value
     return jsonData
 
 
