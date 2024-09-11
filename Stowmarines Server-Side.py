@@ -63,25 +63,27 @@ def system():
         UpdateJSON(singlemodsize,Modname)
 
         return singlemodsize
-
+    
 
 
 
 
     def alltocalculate():
+        filtered_mod = ".a3s"
         '''Collects/Sends every Mod To Be Calculated'''
 
         # Calculates total number of directories found in mod folder location
-        TotalDirectories = len(next(os.walk(MODS_Directory))[1])
+        TotalDirectories = len(next(os.walk(MODS_Directory))[1]) - 1
         indexcounter = 0
 
         # Sends each mod found in mod folder to "calculateModSize" function
         for root, dirs, files in os.walk(MODS_Directory):
             for Modname in dirs:
-                indexcounter += 1
-                size = calculateModSize(Modname)
-                print("UPDATED:", Modname, ":", size)
-                print(indexcounter, "/", TotalDirectories)
+                if Modname != ".a3s":
+                    indexcounter += 1
+                    size = calculateModSize(Modname)
+                    print("UPDATED:", Modname, ":", size)
+                    print(indexcounter, "/", TotalDirectories)
             break
         
 
@@ -193,7 +195,7 @@ def system():
 
         # If the mod DOESN'T exist as a Directory, returns an Error
         else:
-            print("\n*** Error: Mod Was Not Found As a Directory ***\n")
+            print("\n*** Mod Was Not Found As a Directory ***\n")
             restart()
 
 
