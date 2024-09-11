@@ -1,0 +1,24 @@
+{
+  "ModInfo": [
+    {
+      "ModName": "@ACE +Compat",
+      "ModSize": 64,
+      "Optional": false
+    },
+    {
+      "ModName": "@{OPTIONAL} CBA_A3",
+      "ModSize": 75,
+      "Optional": true
+    },
+    {
+      "ModName": "Mod 2",
+      "ModSize": 83,
+      "Optional": false
+    },
+    {
+      "ModName": "Mod 3",
+      "ModSize": 83,
+      "Optional": false
+    }
+  ]
+}
