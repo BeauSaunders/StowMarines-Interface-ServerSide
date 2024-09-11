@@ -8,14 +8,27 @@ import JSONFunctions
 import re
 import shutil
 
-JSON_Location = "D:\\Github\\StowMarines-Interface-ServerSide\\Mods123.json"
-MODS_Directory = "D:\\mods\\"
+
+# Get Location of Current File path, so can open smi_ss_cfg.txt
+CurrentPythonLocator = os.path.dirname(os.path.realpath(__file__))
+smi_ss_cfg_Locator = CurrentPythonLocator + "\\" + "smi_ss_cfg.txt"
+DirectoryLocations = []
+
+with open(smi_ss_cfg_Locator,mode= "r") as Locators:
+    for line in Locators:
+        line = line.strip()
+        DirectoryLocations.append(line)
+    JSON_Location = DirectoryLocations[0]
+    MODS_Directory = DirectoryLocations[1]
+
 
 jsonData = JSONFunctions.LoadJSONFromFile(JSON_Location)
 
 
 def system():
     def start():
+        global special
+
         '''Starting Menu/Console'''
         inp = input('''\nDo You Want To Update:
                     
@@ -28,11 +41,17 @@ def system():
         
         # Decides which route to take based on Input
         if inp == "all":
+            special = True
             alltocalculate()
+            
         elif re.search("^del", inp):
+            special = True
             deleteJSON(inp)
+   
         else:
+            special = False
             calculateModSize(inp)
+            
         
 
 
@@ -69,21 +88,29 @@ def system():
 
 
     def alltocalculate():
-        filtered_mod = ".a3s"
         '''Collects/Sends every Mod To Be Calculated'''
 
-        # Calculates total number of directories found in mod folder location
+        global indexcounter
+        global TotalDirectories
+
+        filtered_mod = ".a3s"
+
+        # Calculates total number of directories found in mod folder location (The -1 is to exclude .a3s)
         TotalDirectories = len(next(os.walk(MODS_Directory))[1]) - 1
+        
         indexcounter = 0
 
         # Sends each mod found in mod folder to "calculateModSize" function
         for root, dirs, files in os.walk(MODS_Directory):
             for Modname in dirs:
-                if Modname != ".a3s":
-                    indexcounter += 1
+                if Modname != filtered_mod:
+                    if indexcounter < TotalDirectories:
+                        indexcounter += 1
                     size = calculateModSize(Modname)
                     print("UPDATED:", Modname, ":", size)
                     print(indexcounter, "/", TotalDirectories)
+                if indexcounter == TotalDirectories:
+                    restart()
             break
         
 
@@ -129,6 +156,10 @@ def system():
             file.write(newData)
         print("\n --- '",Modname,"' Was Succesfully Updated In The JSON File --- \n")
 
+        # Once all mods have updated, restarts the system
+        if special == False:
+            restart()
+        
 
 
 
@@ -192,6 +223,7 @@ def system():
             shutil.rmtree(Modname)
             Modname = re.sub("{MODS_Directory}","",Modname)
             print("\n --- '",Modname,"' Was Succesfully Removed As A Dictionary --- \n")
+            restart()
 
         # If the mod DOESN'T exist as a Directory, returns an Error
         else:
