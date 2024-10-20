@@ -7,11 +7,13 @@ import os
 import JSONFunctions
 import re
 import shutil
+import Hashes
 
 
 # Get Location of Current File path, so can open smi_ss_cfg.txt
 CurrentPythonLocator = os.path.dirname(os.path.realpath(__file__))
 smi_ss_cfg_Locator = CurrentPythonLocator + "\\" + "smi_ss_cfg.txt"
+
 DirectoryLocations = []
 
 with open(smi_ss_cfg_Locator,mode= "r") as Locators:
@@ -51,7 +53,7 @@ def system():
         else:
             special = False
             calculateModSize(inp)
-            
+        
         
 
 
@@ -60,26 +62,28 @@ def system():
     def calculateModSize(Modname):
         '''Calculate a Given Mod's Total Size'''
         # Cocatenates Locator-Prefix with the Mod Input
-        mod = MODS_Directory + Modname
+        mod_location = MODS_Directory + Modname
 
         ModsCheck = []
-
         # Checks if the Mod exists as a Directory
-        for root, dirs, files in os.walk(MODS_Directory):
-            for name in dirs:
-                ModsCheck.append(name)
+        for dirs in os.walk(MODS_Directory):
+            if Modname != ".a3s":
+                ModsCheck.append(Modname)
+                
             break
-
+        
         # Calculates Total Size Of Single Directory (All Contents Included)
         if Modname in ModsCheck:
-            root_directory = Path(mod)
+            root_directory = Path(mod_location)
             size = sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())
+    
         else:
             print("\n*** Error: Mod Was Not Found As a Directory ***\n")
             restart()
+
         singlemodsize = size
 
-        UpdateJSON(singlemodsize,Modname)
+        UpdateJSON(mod_location,singlemodsize,Modname)
 
         return singlemodsize
     
@@ -90,13 +94,20 @@ def system():
     def alltocalculate():
         '''Collects/Sends every Mod To Be Calculated'''
 
+        filtered_mod_condition = True
+
         global indexcounter
         global TotalDirectories
 
-        filtered_mod = ".a3s"
+        if filtered_mod_condition:
+            filtered_mod = ".a3s"
+            indexaffector = -1
+        else:
+            indexaffector = 0
+        
 
         # Calculates total number of directories found in mod folder location (The -1 is to exclude .a3s)
-        TotalDirectories = len(next(os.walk(MODS_Directory))[1]) - 1
+        TotalDirectories = len(next(os.walk(MODS_Directory))[1]) + indexaffector
         
         indexcounter = 0
 
@@ -107,8 +118,7 @@ def system():
                     if indexcounter < TotalDirectories:
                         indexcounter += 1
                     size = calculateModSize(Modname)
-                    print("UPDATED:", Modname, ":", size)
-                    print(indexcounter, "/", TotalDirectories)
+                    print(f"{indexcounter} / {TotalDirectories} \n")
                 if indexcounter == TotalDirectories:
                     restart()
             break
@@ -117,7 +127,7 @@ def system():
 
 
 
-    def UpdateJSON(singlemodsize,Modname):
+    def UpdateJSON(mod_location, singlemodsize,Modname):
         '''Updates The JSON File With New Updated Directory Size'''
         isTrue = False
 
@@ -128,12 +138,19 @@ def system():
             for name in dirs:
                 allModsCheck.append(name)
             break
+        
+        if Modname in allModsCheck:
+                        Hashes.create_hash_dict(mod_location, Modname)
+
 
         # Checks if the Mod is in the JSON file
         existsinJSON = JSONFunctions.DoesModExist(Modname, jsonData)
+
+
         # If Mod DOES exist in JSON file, updates it
         if existsinJSON:
             newData = JSONFunctions.SetVariableValue(Modname, jsonData, "ModSize",singlemodsize)
+
 
         elif Modname in allModsCheck:
         # If the mod DOES exist as a Directory, and the Mod DOESN'T exist in JSON file, adds it to the JSON file
@@ -142,6 +159,8 @@ def system():
         else:
             print("\n*** Error: Mod Was Not Found As a Directory ***\n")
             restart()
+
+
         # Checks whether the mod name starts with "@{OPTIONAL}" and sets boolean state on JSON file
         if re.search(r'^@{OPTIONAL}', Modname):
             newData = JSONFunctions.SetVariableValue(Modname, jsonData, "Optional", True)
@@ -151,10 +170,12 @@ def system():
 
         newData = JSONFunctions.FormatJSON(newData)
 
+
         # Writes to JSON file with updated content
         with open(JSON_Location, mode="w") as file:
             file.write(newData)
-        print("\n --- '",Modname,"' Was Succesfully Updated In The JSON File --- \n")
+        print(f"\n --- {Modname} Was Succesfully Updated In The JSON File --- \n")
+        print(f"UPDATED: {Modname} : {singlemodsize} \n")
 
         # Once all mods have updated, restarts the system
         if special == False:
@@ -238,6 +259,9 @@ def system():
         print('''
 ''')
         system()
+
+
+
 
     start()
 system()

@@ -1,0 +1,3 @@
+D:\Python\mods123.json
+D:\mods\\
+D:\Github\StowMarines-Interface-ServerSide\hashes
