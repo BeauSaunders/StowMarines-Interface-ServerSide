@@ -30,44 +30,76 @@ def create_hash_dict(mod_location, Modname):
 
     global hashes_dict
 
-    # Calculates all subdirs infinitely in mod
-    subdirs = [x[0] for x in os.walk(mod_location)]
-
     hashes_dict = {
         
     }
 
+    files_arr = []
 
-    for subdir in subdirs:
-        for root, dirs, files in os.walk(subdir):
-            for file in files:
-                
-                # Get location of current file in memory
-                full_file_LOCATOR = os.path.join(root, file)
+    for root, dirs, files in os.walk(mod_location):
+        for file in files:
 
-                # calls to the "openfilecontent" function, where it's contents will be read
-                file_content = openfilecontent(full_file_LOCATOR)
-
-
-                hash(file_content, full_file_LOCATOR)
+            # Get the full file path
+            full_file_LOCATOR = os.path.join(root, file)
+            files_arr.append(full_file_LOCATOR)
+           
+    no_of_files = len(files_arr)
+    progress_tracker = 0
+    printProgressBar(0, no_of_files, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
 
-            break
+
+
+    for file in files_arr:
+        # calls to the "openfilecontent" function, where its contents will be read
+        progress_tracker += 1
+        file_content = openfilecontent(file)
+        
+        # Example hash function (replace with your actual hash function)
+        hash(file_content, file)
+        printProgressBar(progress_tracker, no_of_files, prefix = 'Progress:', suffix = 'Complete', length = 50)
+        # print(f"        {progress_tracker} / {no_of_files}", end="\r")
+
 
     CreateJSON(hashes_dict, Modname)
 
     return 0
 
-
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+    
 
 
 
 def openfilecontent(file):
     '''Opens each file to read the content inside'''
 
-    with open(file, mode="r") as f:
+    with open(file, mode="rb") as f:
+        
         file_content = f.read()
-    return file_content
+
+        string_data = file_content.decode('utf-8', errors='ignore')  # Convert bytes to string (utf-8 encoding)
+
+
+    return string_data
 
 
 
