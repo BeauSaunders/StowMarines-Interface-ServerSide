@@ -6,8 +6,7 @@ import os
 import JSONFunctions
 import re
 import shutil
-import Hashes
-
+import Chunk_Hashing
 
 # Get Location of Current File path, so can open smi_ss_cfg.txt
 CurrentPythonLocator = os.path.dirname(os.path.realpath(__file__))
@@ -121,7 +120,8 @@ def system():
         
 
         # Calculates total number of directories found in mod folder location (The -1 is to exclude .a3s)
-        TotalDirectories = len(next(os.walk(MODS_Directory))[1]) + indexaffector
+        TotalDirectories = len(next(os.walk(MODS_Directory))[0]) + indexaffector
+        
         
         indexcounter = 0
 
@@ -145,7 +145,7 @@ def system():
         '''Updates The JSON File With New Updated Directory Size'''
         isTrue = False
 
-        allModsCheck = []
+        allModsCheck = [] 
 
         # Checks if the Mod exists as a Directory
         for root, dirs, files in os.walk(MODS_Directory):
@@ -154,7 +154,7 @@ def system():
             break
         
         if Modname in allModsCheck:
-                        Hashes.create_hash_dict(mod_location, Modname)
+                        Chunk_Hashing.create_hash_dict(mod_location,Modname)
 
 
         # Checks if the Mod is in the JSON file
