@@ -10,6 +10,7 @@ The system is responsible for calculating mod sizes, names and optional states i
 - [ ] Adjust smi_ss_cfg.txt:</br>
 `PATH\TO\SERVER\MOD\MANIFEST\FILE.json`</br>
 `PATH\TO\SMI\MODS\FOLDER\\`</br>
+`PATH\TO\SMI\HASH\FOLDER`</br>
 </br>
 
 > [!IMPORTANT]
