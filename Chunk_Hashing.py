@@ -9,8 +9,11 @@ import re
 import mmap
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import multiprocessing
+import aiofiles
+import asyncio
 
-
+max_workers = multiprocessing.cpu_count() - 1
 
 
 
@@ -18,7 +21,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 CurrentPythonLocator = os.path.dirname(os.path.realpath(__file__))
 smi_ss_cfg_Locator = CurrentPythonLocator + "\\" + "smi_ss_cfg.txt"
 
-print(smi_ss_cfg_Locator)
 DirectoryLocations = []
 
 with open(smi_ss_cfg_Locator,mode= "r") as Locators:
@@ -26,10 +28,10 @@ with open(smi_ss_cfg_Locator,mode= "r") as Locators:
         line = line.strip()
         DirectoryLocations.append(line)
         
-    HashLOCATOR = DirectoryLocations[2]
+HashLOCATOR = DirectoryLocations[2]
     
 
-
+hashes_dict = {}
 
 
 
@@ -37,9 +39,6 @@ with open(smi_ss_cfg_Locator,mode= "r") as Locators:
 
 def create_hash_dict(mod_location, Modname):
     '''Appends to a dictionary that holds the file name/location in mod, and the hash'''
-    global hashes_dict
-    
-    hashes_dict = {}
 
     files_arr = []
 
@@ -59,7 +58,7 @@ def create_hash_dict(mod_location, Modname):
     total_start_time = time.time()
 
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Correctly submit the hash_file with full file path
         future_to_file = {executor.submit(hash_file, file): file for file in files_arr}
 
@@ -86,8 +85,6 @@ def create_hash_dict(mod_location, Modname):
 
     CreateJSON(hashes_dict, Modname)
 
-    return 0
-
 
 
 
@@ -111,13 +108,19 @@ def hash_file(full_file_LOCATOR):
     '''Creates a hash for all content inside of each file'''
     
     try:
+        
+        #print(f"Currently Processing file: {full_file_LOCATOR}"
 
         # Extract part of the file location (e.g., everything after "@")
         index = full_file_LOCATOR.index("@")
         file_LOCATOR = full_file_LOCATOR[index:]
         file_LOCATOR = re.sub(r'\\', "/", file_LOCATOR)
 
-
+        # Check if the file size is zero and skip mmap if it is
+        file_size = os.path.getsize(full_file_LOCATOR)
+        if file_size == 0:
+            return file_LOCATOR, ""
+        
         # Open the file and create hash
         with open(full_file_LOCATOR, mode="rb") as f:
             # Memory-map the file
@@ -126,7 +129,7 @@ def hash_file(full_file_LOCATOR):
             hasher = hashlib.sha256()
 
             # Read the file in chunks
-            chunk_size = 1024 * 1024 * 64  # 64 MB chunks
+            chunk_size = 1024 * 1024 * 32  # 32 MB chunks
             while True:
                 chunk = mm.read(chunk_size) # Read a chunk from the memory-mapped file
                 if not chunk: # If the chunk is empty, we've reached the end of the file

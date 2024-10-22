@@ -120,7 +120,7 @@ def system():
         
 
         # Calculates total number of directories found in mod folder location (The -1 is to exclude .a3s)
-        TotalDirectories = len(next(os.walk(MODS_Directory))[0]) + indexaffector
+        TotalDirectories = len(next(os.walk(MODS_Directory))[1]) + indexaffector
         
         
         indexcounter = 0
@@ -132,7 +132,7 @@ def system():
                     if indexcounter < TotalDirectories:
                         indexcounter += 1
                     size = calculateModSize(Modname)
-                    print(f"{indexcounter} / {TotalDirectories} \n")
+                    print(f"{indexcounter} / {TotalDirectories} \n\n")
                 if indexcounter == TotalDirectories:
                     restart()
             break
@@ -154,7 +154,7 @@ def system():
             break
         
         if Modname in allModsCheck:
-                        Chunk_Hashing.create_hash_dict(mod_location,Modname)
+                    Chunk_Hashing.create_hash_dict(mod_location,Modname)
 
 
         # Checks if the Mod is in the JSON file
