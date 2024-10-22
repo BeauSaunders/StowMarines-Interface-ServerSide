@@ -28,9 +28,6 @@ with open(smi_ss_cfg_Locator,mode= "r") as Locators:
         DirectoryLocations.append(line)
         
 HashLOCATOR = DirectoryLocations[2]
-    
-
-hashes_dict = {}
 
 
 
@@ -38,6 +35,9 @@ hashes_dict = {}
 
 def create_hash_dict(mod_location, Modname):
     '''Appends to a dictionary that holds the file name/location in mod, and the hash'''
+    global hashes_dict
+    
+    hashes_dict = {}
 
     files_arr = []
 
