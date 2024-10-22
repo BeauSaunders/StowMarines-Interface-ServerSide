@@ -10,8 +10,7 @@ import mmap
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import multiprocessing
-import aiofiles
-import asyncio
+
 
 max_workers = multiprocessing.cpu_count() - 1
 
