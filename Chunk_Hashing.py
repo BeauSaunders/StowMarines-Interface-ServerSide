@@ -36,38 +36,31 @@ HashLOCATOR = DirectoryLocations[2]
 def create_hash_dict(mod_location, Modname):
     '''Appends to a dictionary that holds the file name/location in mod, and the hash'''
     global hashes_dict
-    
     hashes_dict = {}
 
     files_arr = []
 
+    # Collect all files
     for root, _, files in os.walk(mod_location):
         for file in files:
-
-            # Get the full file path
             full_file_LOCATOR = os.path.join(root, file)
             files_arr.append(full_file_LOCATOR)
 
-           
     no_of_files = len(files_arr)
     progress_tracker = 0
-    printProgressBar(0, no_of_files, prefix = 'Progress:', suffix = 'Complete', length = 50)
-
+    printProgressBar(0, no_of_files, prefix='Progress:', suffix='Complete', length=50)
 
     total_start_time = time.time()
 
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Correctly submit the hash_file with full file path
         future_to_file = {executor.submit(hash_file, file): file for file in files_arr}
 
         for future in as_completed(future_to_file):
             file = future_to_file[future]
             try:
-                # Get the result directly from hash_file
                 file_LOCATOR, hash_value = future.result()
-                if hash_value is not None:  # Only update if hash_value is valid
-                    # Update the global dictionary
+                if hash_value is not None:
                     hashes_dict.update({file_LOCATOR: hash_value})
 
                 # Increment progress tracker
@@ -77,12 +70,12 @@ def create_hash_dict(mod_location, Modname):
             except Exception as exc:
                 print(f"{file} generated an exception: {exc}")
 
-        
     total_end_time = time.time()
     total_duration = total_end_time - total_start_time
     print(f"\nTotal time taken for hashing all files {total_duration:.6f} seconds.")
 
     CreateJSON(hashes_dict, Modname)
+
 
 
 
@@ -119,16 +112,18 @@ def hash_file(full_file_LOCATOR):
         file_size = os.path.getsize(full_file_LOCATOR)
         if file_size == 0:
             return file_LOCATOR, ""
-        
+
+
+
         # Open the file and create hash
         with open(full_file_LOCATOR, mode="rb") as f:
             # Memory-map the file
             mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
 
-            hasher = hashlib.sha256()
+            hasher = hashlib.md5()
 
             # Read the file in chunks
-            chunk_size = 1024 * 1024 * 32  # 32 MB chunks
+            chunk_size = 1024 * 1024 * 64 # 64MB Chunks
             while True:
                 chunk = mm.read(chunk_size) # Read a chunk from the memory-mapped file
                 if not chunk: # If the chunk is empty, we've reached the end of the file

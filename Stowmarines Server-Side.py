@@ -51,7 +51,7 @@ def system():
     --- Update Specific Mod ---
     or
     --- Del Specific Mod ---
-                    \n''')
+                    \n\n''')
         
         # Decides which route to take based on Input
         if inp == "all":
